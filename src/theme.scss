@@ -1,0 +1,23 @@
+#toolbar{
+	display:flex;
+	
+	label{
+		// display:inline-block;
+		margin-right: 10px;
+	}
+	
+	input[type=text]{
+		width:50px;
+		margin-right: 10px;
+	}
+
+	button{
+		margin-right: 10px;
+	}
+}
+
+.hint{
+	color: #808080;
+	font-size:smaller;
+	margin-top:0.5em;
+}
