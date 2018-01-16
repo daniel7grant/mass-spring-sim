@@ -47,8 +47,8 @@ export default class MassSpringModel {
 	 */
 	next(dt) {
 		this.t += dt;
-		let ft = this.f * Math.sin(this.w * this.t);
-		let x0 = (ft + (this.b/dt + 2*this.m/dt/dt) * this.x[0] - this.m/dt/dt * this.x[1]) / (this.k + this.b /dt + this.m/dt/dt);
+		this.ft = this.f * Math.sin(this.w * this.t);
+		let x0 = (this.ft + (this.b/dt + 2*this.m/dt/dt) * this.x[0] - this.m/dt/dt * this.x[1]) / (this.k + this.b /dt + this.m/dt/dt);
 		this.x.unshift(x0);
 		return x0;
 	}

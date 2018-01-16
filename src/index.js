@@ -6,7 +6,7 @@ import './theme.scss';
 var sketch = function (p) {
 
 	/* The Model */
-	var model = new MassSpringModel(0.1, 10, 10, -0.5, 2, 0);
+	var model = new MassSpringModel(0.1, 10, 10, -0.5, 1, 0);
 	/* Time-based variables */
 	var dt = 0;
 	var previoustime = 0, playtime = 0;
@@ -18,7 +18,7 @@ var sketch = function (p) {
 	const mmtopx = 2000; // Approx. 1 m = 2000 px
 	const timetopx = 30;
 	const Ntopx = 100;
-	const massx = 600, massy = 200, massw = 50, massh = 20;
+	const massx = 600, massy = 300, massw = 50, massh = 20;
 	const springh = 150, springn = 10, springr = 10, springtop = 20;
 	const arroww = 10, arrowh = 3;
 
@@ -83,14 +83,13 @@ var sketch = function (p) {
 	}
 
 	function drawSpring(y) {
-		p.line(massx + massw / 2, massy - springh, massx + massw / 2, massy - springh - springtop);
-		p.line(massx, massy - springh - springtop, massx + massw, massy - springh - springtop);
+		p.line(massx, massy - springh + Ntopx*model.getData('ft'), massx + massw, massy - springh + Ntopx*model.getData('ft'));
 		const diff = 0.5;
 		for (var t = 0; t < 2 * springn * Math.PI; t += diff) {
 			p.line(massx + massw / 2 + springr * Math.sin(t),
-				massy + mmtopx * y - t / (2 * springn * Math.PI) * (springh + mmtopx * y),
-				massx + massw / 2 + springr * Math.sin((t + diff)),
-				massy + mmtopx * y - (t + diff) / (2 * springn * Math.PI) * (springh + mmtopx * y));
+				massy + mmtopx * y - t / (2 * springn * Math.PI) * (springh + mmtopx * y - Ntopx*model.getData('ft')),
+				massx + massw / 2 + springr * Math.sin(t + diff),
+				massy + mmtopx * y - (t + diff) / (2 * springn * Math.PI) * (springh + mmtopx * y - Ntopx*model.getData('ft')));
 		}
 	}
 
@@ -101,14 +100,18 @@ var sketch = function (p) {
 			p.line(massx - playtime * timetopx, arroww, massx - playtime * timetopx, 2 * (massy + massh / 2));
 			p.triangle(massx - playtime * timetopx, 0, massx - playtime * timetopx + arrowh, arroww, massx - playtime * timetopx - arrowh, arroww);
 		}
-		const nth = 2;
+		const nth = 3;
 		for (var i = 0; graph[i + nth] && massx - (playtime - graph[i + nth].x) * timetopx > 0; i+=nth) {
 			p.stroke(0, 128, 0);
-			p.line(massx - (playtime - graph[i].x) * timetopx, massy + massh / 2 + mmtopx * graph[i].y,
-				massx - (playtime - graph[i + nth].x) * timetopx, massy + massh / 2 + mmtopx * graph[i + nth].y);
+			p.line(massx - (playtime - graph[i].x) * timetopx,
+				massy + massh / 2 + mmtopx * graph[i].y,
+				massx - (playtime - graph[i + nth].x) * timetopx,
+				massy + massh / 2 + mmtopx * graph[i + nth].y);
 			p.stroke(128, 128, 255);
-			p.line(massx - (playtime - graph[i].x) * timetopx, massy + massh / 2 + Ntopx*model.getData('f') * Math.sin(model.getData('w') * (graph[i].x)),
-				massx - (playtime - graph[i + nth].x) * timetopx, massy + massh / 2 + Ntopx*model.getData('f') * Math.sin(model.getData('w') * (graph[i + nth].x)));
+			p.line(massx - (playtime - graph[i].x) * timetopx,
+				massy - springh + Ntopx*model.getData('f')*Math.sin(model.getData('w')*(graph[i].x)),
+				massx - (playtime - graph[i + nth].x) * timetopx,
+				massy - springh + Ntopx*model.getData('f') * Math.sin(model.getData('w') * (graph[i + nth].x)));
 		}
 		p.stroke(0);
 	}
