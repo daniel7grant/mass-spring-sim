@@ -42,7 +42,7 @@ var sketch = function (p) {
 			plotGraph();
 			drawSpring(y);
 			p.rect(massx, massy + mmtopx * y, massw, massh);
-			graph.unshift({ 'x': playtime, 'y': y });
+			graph.unshift({ 'x': playtime, 'y': y, 'ft' : model.getData('ft') });
 		}
 	};
 
@@ -69,6 +69,11 @@ var sketch = function (p) {
 			toolbar.child(createInputWithLabel(label));
 		}
 		toolbar.child(p.createButton('Restart with new values').mousePressed(() => reset()));
+		toolbar.child(p.createSlider(-1, 1, Math.log10(model.getData('w')), 0).changed(function(){
+			p.select('#wc').html('w = ' + Math.pow(10, this.value()));
+			model.setData('w', Math.pow(10, this.value()));		
+		}));
+		toolbar.child(p.createP('w = ' + model.getData('w')).id('wc'));
 		p.createP('Set the variables, and hit restart! m:=mass[kg], b:=damping coefficient[Ns/m], k:=spring constant[N/m], f:=force amplitude[N], w:=frequency[1/s], x0:=starting displacement[m].').class('hint');
 	}
 
@@ -100,7 +105,7 @@ var sketch = function (p) {
 			p.line(massx - playtime * timetopx, arroww, massx - playtime * timetopx, 2 * (massy + massh / 2));
 			p.triangle(massx - playtime * timetopx, 0, massx - playtime * timetopx + arrowh, arroww, massx - playtime * timetopx - arrowh, arroww);
 		}
-		const nth = 3;
+		const nth = 1;
 		for (var i = 0; graph[i + nth] && massx - (playtime - graph[i + nth].x) * timetopx > 0; i+=nth) {
 			p.stroke(0, 128, 0);
 			p.line(massx - (playtime - graph[i].x) * timetopx,
@@ -109,9 +114,9 @@ var sketch = function (p) {
 				massy + massh / 2 + mmtopx * graph[i + nth].y);
 			p.stroke(128, 128, 255);
 			p.line(massx - (playtime - graph[i].x) * timetopx,
-				massy - springh + Ntopx*model.getData('f')*Math.sin(model.getData('w')*(graph[i].x)),
+				massy - springh + Ntopx*graph[i].ft,
 				massx - (playtime - graph[i + nth].x) * timetopx,
-				massy - springh + Ntopx*model.getData('f') * Math.sin(model.getData('w') * (graph[i + nth].x)));
+				massy - springh + Ntopx*graph[i + nth].ft);
 		}
 		p.stroke(0);
 	}
