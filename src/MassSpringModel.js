@@ -55,9 +55,18 @@ export default class MassSpringModel {
 
 	/**
 	 * Gets the value of the parameter
-	 * @param {String} which 
+	 * @param {String} which the name of the parameter
 	 */
 	getData(which){
 		return this[which];
+	}
+
+	/**
+	 * Sets the value of the parameter
+	 * @param {String} which the name of the parameter
+	 * @param {*} to the new value
+	 */
+	setData(which, to){
+		this[which] = to;
 	}
 }
