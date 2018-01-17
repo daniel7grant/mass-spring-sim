@@ -61,7 +61,7 @@
 /******/ 	
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "68f68164b7dce2247264"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "179e3deba4aec24a03d9"; // eslint-disable-line no-unused-vars
 /******/ 	var hotRequestTimeout = 10000;
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule; // eslint-disable-line no-unused-vars
@@ -735,7 +735,7 @@ exports = module.exports = __webpack_require__("./node_modules/css-loader/lib/cs
 
 
 // module
-exports.push([module.i, "#toolbar {\n  display: flex;\n  align-items: center; }\n  #toolbar label {\n    margin-right: 10px; }\n  #toolbar input[type=text] {\n    width: 50px;\n    margin-right: 10px; }\n  #toolbar button {\n    margin-right: 10px; }\n  #toolbar p {\n    margin: 0px; }\n\n.hint {\n  color: #808080;\n  font-size: smaller;\n  margin-top: 0.5em; }\n", ""]);
+exports.push([module.i, "#toolbar {\n  display: flex;\n  align-items: center; }\n  #toolbar button {\n    margin-right: 10px; }\n  #toolbar p {\n    margin: 0px; }\n  #toolbar div {\n    display: flex;\n    align-items: center; }\n    #toolbar div label {\n      margin-right: 10px; }\n    #toolbar div input {\n      margin-right: 10px; }\n      #toolbar div input[type=text] {\n        width: 50px; }\n\n.hint {\n  color: #808080;\n  font-size: smaller;\n  margin-top: 0.5em; }\n", ""]);
 
 // exports
 
@@ -75392,12 +75392,12 @@ var sketch = function (p) {
 	const fps = 60; // If it stops working try to lower this
 	const mmtopx = 2000; // Approx. 1 m = 2000 px
 	const timetopx = 30;
-	const Ntopx = 100;
+	//const Ntopx = 200;
 	const massx = 600,
 	      massy = 300,
 	      massw = 50,
 	      massh = 20;
-	const springh = 150,
+	const springh = 200,
 	      springn = 10,
 	      springr = 10,
 	      springtop = 20;
@@ -75435,7 +75435,7 @@ var sketch = function (p) {
 
 	/** Resets the values to the defaults and restarts the animation */
 	function reset() {
-		model = new __WEBPACK_IMPORTED_MODULE_2__MassSpringModel__["a" /* default */](parseFloat(p.select('#m').value()), parseFloat(p.select('#b').value()), parseFloat(p.select('#k').value()), parseFloat(p.select('#f').value()), parseFloat(p.select('#w').value()), parseFloat(p.select('#x0').value()));
+		model = new __WEBPACK_IMPORTED_MODULE_2__MassSpringModel__["a" /* default */](parseFloat(p.select('#m').value()), parseFloat(p.select('#b').value()), parseFloat(p.select('#k').value()), parseFloat(p.select('#f').value()), Math.pow(10, parseFloat(p.select('#w').value())), parseFloat(p.select('#x0').value()));
 		previoustime = now(), playtime = 0;
 		graph = [];
 	}
@@ -75443,32 +75443,29 @@ var sketch = function (p) {
 	/** Creates settings options in a form of a toolbar */
 	function createToolbar() {
 		let toolbar = p.createDiv('').id('toolbar').child(p.createButton('Start/Pause').mousePressed(() => playing = !playing));
-		for (let label of ['m', 'b', 'k', 'f', 'w', 'x0']) {
+		for (let label of ['m', 'b', 'k', 'x0', 'f']) {
 			toolbar.child(createInputWithLabel(label));
 		}
+		toolbar.child(p.createDiv('').child(p.createElement('label', 'w = ' + model.getData('w')).id('wtext').attribute('for', 'w')).child(p.createSlider(-1, 1, Math.log10(model.getData('w')), 0).id('w').changed(function () {
+			p.select('#wtext').html('w = ' + Math.round(Math.pow(10, this.value()) * 100) / 100);
+		})));
+		// toolbar.child(p.createP('w = ' + model.getData('w')).id('wtext'));
 		toolbar.child(p.createButton('Restart with new values').mousePressed(() => reset()));
-		toolbar.child(p.createSlider(-1, 1, Math.log10(model.getData('w')), 0).changed(function () {
-			p.select('#wc').html('w = ' + Math.pow(10, this.value()));
-			model.setData('w', Math.pow(10, this.value()));
-		}));
-		toolbar.child(p.createP('w = ' + model.getData('w')).id('wc'));
 		p.createP('Set the variables, and hit restart! m:=mass[kg], b:=damping coefficient[Ns/m], k:=spring constant[N/m], f:=force amplitude[N], w:=frequency[1/s], x0:=starting displacement[m].').class('hint');
 	}
 
 	/** Creates an input with the necessary settings */
 	function createInputWithLabel(label) {
 		let labelinput = p.createDiv('');
-		labelinput.child(p.createElement('label', label).attribute('for', label)).child(p.createInput(model.getData(label)).attribute('id', label).attribute('name', label).input(function () {
-			//model.setData(label, parseInt(this.value()));
-		}));
+		labelinput.child(p.createElement('label', label).attribute('for', label)).child(p.createInput(model.getData(label)).id(label).attribute('name', label));
 		return labelinput;
 	}
 
 	function drawSpring(y) {
-		p.line(massx, massy - springh + Ntopx * model.getData('ft'), massx + massw, massy - springh + Ntopx * model.getData('ft'));
+		p.line(massx, massy - springh + mmtopx / model.getData('k') * model.getData('ft'), massx + massw, massy - springh + mmtopx / model.getData('k') * model.getData('ft'));
 		const diff = 0.5;
 		for (var t = 0; t < 2 * springn * Math.PI; t += diff) {
-			p.line(massx + massw / 2 + springr * Math.sin(t), massy + mmtopx * y - t / (2 * springn * Math.PI) * (springh + mmtopx * y - Ntopx * model.getData('ft')), massx + massw / 2 + springr * Math.sin(t + diff), massy + mmtopx * y - (t + diff) / (2 * springn * Math.PI) * (springh + mmtopx * y - Ntopx * model.getData('ft')));
+			p.line(massx + massw / 2 + springr * Math.sin(t), massy + mmtopx * y - t / (2 * springn * Math.PI) * (springh + mmtopx * y - mmtopx / model.getData('k') * model.getData('ft')), massx + massw / 2 + springr * Math.sin(t + diff), massy + mmtopx * y - (t + diff) / (2 * springn * Math.PI) * (springh + mmtopx * y - mmtopx / model.getData('k') * model.getData('ft')));
 		}
 	}
 
@@ -75484,7 +75481,7 @@ var sketch = function (p) {
 			p.stroke(0, 128, 0);
 			p.line(massx - (playtime - graph[i].x) * timetopx, massy + massh / 2 + mmtopx * graph[i].y, massx - (playtime - graph[i + nth].x) * timetopx, massy + massh / 2 + mmtopx * graph[i + nth].y);
 			p.stroke(128, 128, 255);
-			p.line(massx - (playtime - graph[i].x) * timetopx, massy - springh + Ntopx * graph[i].ft, massx - (playtime - graph[i + nth].x) * timetopx, massy - springh + Ntopx * graph[i + nth].ft);
+			p.line(massx - (playtime - graph[i].x) * timetopx, massy - springh + mmtopx / model.getData('k') * graph[i].ft, massx - (playtime - graph[i + nth].x) * timetopx, massy - springh + mmtopx / model.getData('k') * graph[i + nth].ft);
 		}
 		p.stroke(0);
 	}
