@@ -39,14 +39,9 @@
 #container{
 	position:relative;
 
-	#canvas1{
+	canvas{
 		position:absolute;
 		top:0px;
 		//left:$massx;
-	}
-	#canvas2{
-		position:absolute;
-		top:0px;
-		// left:$massx;
 	}
 }

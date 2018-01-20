@@ -61,7 +61,7 @@
 /******/ 	
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "a55af9908f54c511f81f"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "88f96f7e281551ece850"; // eslint-disable-line no-unused-vars
 /******/ 	var hotRequestTimeout = 10000;
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule; // eslint-disable-line no-unused-vars
@@ -735,7 +735,7 @@ exports = module.exports = __webpack_require__("./node_modules/css-loader/lib/cs
 
 
 // module
-exports.push([module.i, "#toolbar {\n  display: flex;\n  align-items: center; }\n  #toolbar button {\n    margin-right: 10px; }\n  #toolbar p {\n    margin: 0px; }\n  #toolbar div {\n    display: flex;\n    align-items: center; }\n    #toolbar div label {\n      margin-right: 10px; }\n    #toolbar div input {\n      margin-right: 10px; }\n      #toolbar div input[type=text] {\n        width: 50px; }\n\n.hint {\n  color: #808080;\n  font-size: smaller;\n  margin-top: 0.5em; }\n\n#container {\n  position: relative; }\n  #container #canvas1 {\n    position: absolute;\n    top: 0px; }\n  #container #canvas2 {\n    position: absolute;\n    top: 0px; }\n", ""]);
+exports.push([module.i, "#toolbar {\n  display: flex;\n  align-items: center; }\n  #toolbar button {\n    margin-right: 10px; }\n  #toolbar p {\n    margin: 0px; }\n  #toolbar div {\n    display: flex;\n    align-items: center; }\n    #toolbar div label {\n      margin-right: 10px; }\n    #toolbar div input {\n      margin-right: 10px; }\n      #toolbar div input[type=text] {\n        width: 50px; }\n\n.hint {\n  color: #808080;\n  font-size: smaller;\n  margin-top: 0.5em; }\n\n#container {\n  position: relative; }\n  #container canvas {\n    position: absolute;\n    top: 0px; }\n", ""]);
 
 // exports
 
@@ -75378,7 +75378,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 /* The Model */
-var model = new __WEBPACK_IMPORTED_MODULE_2__MassSpringModel__["a" /* default */](0.1, 1, 10, -0.5, 1, 0);
+var model = new __WEBPACK_IMPORTED_MODULE_2__MassSpringModel__["a" /* default */](10, 5, 10, -0.3, 1, 0);
 /* Time-based variables */
 var dt = 0;
 var previoustime = 0,
@@ -75387,10 +75387,10 @@ var graph = [];
 /* Control variables */
 var playing = true;
 /* Define constants */
+var faster = 1; //Change this to make it faster tho less accurate
 const fps = 120; // If it stops working try to lower this
 const mmtopx = 2000; // Approx. 1 m = 2000 px
 const timetopx = 30;
-//const Ntopx = 200;
 const massx = 600,
       massy = 300,
       massw = 50,
@@ -75401,15 +75401,23 @@ const springh = 200,
       springtop = 20;
 const arroww = 10,
       arrowh = 3;
+const margin = 20;
 const maxwidth = 10000;
+const bodepos = 200,
+      bodewidth = 300;
+
+/** Returns the current UNIX timestamp in seconds */
+function now() {
+	return Date.now() * 0.001;
+}
 
 var sketch1 = function (p) {
 	p.setup = function () {
 		createToolbar();
-		p.createDiv('').id('container').child(p.createCanvas(massx * 1.5, maxwidth).id('canvas1').style('left', massx + 'px'));
-		reset();
+		p.createDiv('').id('container').child(p.createCanvas(maxwidth, massy * 2).id('canvas1').style('left', massx + 'px'));
 		p.smooth();
 		p.noLoop();
+		reset();
 	};
 
 	p.draw = function () {
@@ -75425,7 +75433,6 @@ var sketch1 = function (p) {
 		toolbar.child(p.createDiv('').child(p.createElement('label', 'w = ' + model.getData('w')).id('wtext').attribute('for', 'w')).child(p.createSlider(-1, 1, Math.log10(model.getData('w')), 0).id('w').changed(function () {
 			p.select('#wtext').html('w = ' + Math.round(Math.pow(10, this.value()) * 100) / 100);
 		})));
-		// toolbar.child(p.createP('w = ' + model.getData('w')).id('wtext'));
 		toolbar.child(p.createButton('Restart with new values').mousePressed(() => reset()));
 		p.createP('Set the variables, and hit restart! m:=mass[kg], b:=damping coefficient[Ns/m], k:=spring constant[N/m], f:=force amplitude[N], w:=frequency[1/s], x0:=starting displacement[m].').class('hint');
 	}
@@ -75443,26 +75450,67 @@ var sketch1 = function (p) {
 		model = new __WEBPACK_IMPORTED_MODULE_2__MassSpringModel__["a" /* default */](parseFloat(p.select('#m').value()), parseFloat(p.select('#b').value()), parseFloat(p.select('#k').value()), parseFloat(p.select('#f').value()), Math.pow(10, parseFloat(p.select('#w').value())), parseFloat(p.select('#x0').value()));
 		previoustime = now(), playtime = 0;
 		graph = [{ x: 0, y: 0, ft: 0 }, { x: 0, y: 0, ft: 0 }];
-		p.line(0, massy + massh / 2, maxwidth - arroww, massy + massh / 2);
+		p.line(margin, massy + massh / 2, maxwidth - arroww, massy + massh / 2);
 		p.triangle(maxwidth, massy + massh / 2, maxwidth - arroww, massy + massh / 2 + arrowh, maxwidth - arroww, massy + massh / 2 - arrowh);
-		p.line(0, arroww, 0, 2 * (massy + massh / 2));
-		p.triangle(0, 0, arrowh, arroww, -arrowh, arroww);
+		p.line(margin, arroww, margin, 2 * (massy + massh / 2));
+		p.triangle(margin, 0, margin + arrowh, arroww, margin - arrowh, arroww);
+		p0.redraw();
 	}
 
 	function plotGraph() {
-		p.select('#canvas1').style('left', massx - playtime * timetopx + 'px');
-		// const nth = 1;
-		// for (var i = 0; graph[i + nth] && massx - (playtime - graph[i + nth].x) * timetopx > 0; i+=nth) {
+		p.select('#canvas1').style('left', massx - playtime * timetopx - margin + 'px');
+		if (graph[1].x * timetopx > maxwidth) {
+			playing = false;
+		}
 		p.stroke(0, 128, 0);
-		p.line(graph[0].x * timetopx, massy + massh / 2 + mmtopx * graph[0].y, graph[1].x * timetopx, massy + massh / 2 + mmtopx * graph[1].y);
+		p.line(margin + graph[0].x * timetopx, massy + massh / 2 + mmtopx * graph[0].y, margin + graph[1].x * timetopx, massy + massh / 2 + mmtopx * graph[1].y);
 		p.stroke(128, 128, 255);
-		p.line(graph[0].x * timetopx, massy - springh + mmtopx / model.getData('k') * graph[0].ft, graph[1].x * timetopx, massy - springh + mmtopx / model.getData('k') * graph[1].ft);
-		// }
+		p.line(margin + graph[0].x * timetopx, massy - springh + mmtopx / model.getData('k') * graph[0].ft, margin + graph[1].x * timetopx, massy - springh + mmtopx / model.getData('k') * graph[1].ft);
 		p.stroke(0);
 	}
 };
 
 var p1 = new __WEBPACK_IMPORTED_MODULE_1_p5___default.a(sketch1);
+
+var bode = function (p) {
+
+	p.setup = function () {
+		p.select('#container').child(p.createCanvas(bodewidth, massy * 2).id('bode').style('left', massx + bodepos + 'px'));
+		p.smooth();
+		p.noLoop();
+	};
+
+	p.draw = function () {
+		p.clear();
+		p.line(margin, massy + massh / 2, bodewidth - arroww, massy + massh / 2);
+		p.triangle(bodewidth, massy + massh / 2, bodewidth - arroww, massy + massh / 2 + arrowh, bodewidth - arroww, massy + massh / 2 - arrowh);
+		p.line(margin, arroww, margin, 2 * (massy + massh / 2));
+		p.triangle(margin, 0, margin + arrowh, arroww, margin - arrowh, arroww);
+		for (let i = 0; i < 10; i++) {
+			p.line(margin + (Math.log10(i) + 1) / 2 * (bodewidth - margin), massy + massh / 2 - arrowh / 2, margin + (Math.log10(i) + 1) / 2 * (bodewidth - margin), massy + massh / 2 + arrowh / 2);
+			p.line(margin + (Math.log10(i * 0.1) + 1) / 2 * (bodewidth - margin), massy + massh / 2 - arrowh / 2, margin + (Math.log10(i * 0.1) + 1) / 2 * (bodewidth - margin), massy + massh / 2 + arrowh / 2);
+		}
+		const diff = 0.01;
+		let f = model.getData('f'),
+		    k = model.getData('k'),
+		    wc = model.getData('w'),
+		    wn = Math.sqrt(model.getData('k') / model.getData('m')),
+		    zeta = model.getData('b') / (2 * Math.sqrt(model.getData('k') * model.getData('m'))),
+		    rc = wc / wn;
+		p.stroke(255, 0, 0).strokeWeight(2);
+		p.line(margin + (Math.log10(wc) + 1) / 2 * (bodewidth - margin), massy + massh / 2, margin + (Math.log10(wc) + 1) / 2 * (bodewidth - margin), massy + massh / 2 + mmtopx * f / k * 1 / Math.sqrt((1 - rc * rc) * (1 - rc * rc) + 2 * zeta * rc * (2 * zeta * rc)));
+		p.stroke(0, 0, 0).strokeWeight(1);
+		for (let wlog = -1; wlog <= 1; wlog += diff) {
+			let r = Math.pow(10, wlog) / wn,
+			    r2 = Math.pow(10, wlog + diff);
+			p.stroke(0, 0, 128);
+			p.line(margin + (wlog + 1) / 2 * (bodewidth - margin), massy + massh / 2 + mmtopx * f / k * 1 / Math.sqrt((1 - r * r) * (1 - r * r) + 2 * zeta * r * (2 * zeta * r)), margin + (wlog + diff + 1) / 2 * (bodewidth - margin), massy + massh / 2 + mmtopx * f / k * 1 / Math.sqrt((1 - r2 * r2) * (1 - r2 * r2) + 2 * zeta * r2 * (2 * zeta * r2)));
+			p.stroke(0, 0, 0);
+		}
+	};
+};
+
+var p0 = new __WEBPACK_IMPORTED_MODULE_1_p5___default.a(bode);
 
 var sketch2 = function (p) {
 
@@ -75473,7 +75521,7 @@ var sketch2 = function (p) {
 	};
 
 	p.draw = function () {
-		dt = now() - previoustime || 0.00001; // In case of dt = 0
+		dt = faster * (now() - previoustime) || 0.00001; // In case of dt = 0
 		previoustime = now();
 		if (playing) {
 			playtime += dt;
@@ -75496,11 +75544,6 @@ var sketch2 = function (p) {
 };
 
 var p2 = new __WEBPACK_IMPORTED_MODULE_1_p5___default.a(sketch2);
-
-/** Returns the current UNIX timestamp in seconds */
-function now() {
-	return Date.now() * 0.001;
-}
 
 /***/ }),
 
