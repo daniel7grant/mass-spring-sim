@@ -61,7 +61,7 @@
 /******/ 	
 /******/ 	
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "179e3deba4aec24a03d9"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "a55af9908f54c511f81f"; // eslint-disable-line no-unused-vars
 /******/ 	var hotRequestTimeout = 10000;
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule; // eslint-disable-line no-unused-vars
@@ -735,7 +735,7 @@ exports = module.exports = __webpack_require__("./node_modules/css-loader/lib/cs
 
 
 // module
-exports.push([module.i, "#toolbar {\n  display: flex;\n  align-items: center; }\n  #toolbar button {\n    margin-right: 10px; }\n  #toolbar p {\n    margin: 0px; }\n  #toolbar div {\n    display: flex;\n    align-items: center; }\n    #toolbar div label {\n      margin-right: 10px; }\n    #toolbar div input {\n      margin-right: 10px; }\n      #toolbar div input[type=text] {\n        width: 50px; }\n\n.hint {\n  color: #808080;\n  font-size: smaller;\n  margin-top: 0.5em; }\n", ""]);
+exports.push([module.i, "#toolbar {\n  display: flex;\n  align-items: center; }\n  #toolbar button {\n    margin-right: 10px; }\n  #toolbar p {\n    margin: 0px; }\n  #toolbar div {\n    display: flex;\n    align-items: center; }\n    #toolbar div label {\n      margin-right: 10px; }\n    #toolbar div input {\n      margin-right: 10px; }\n      #toolbar div input[type=text] {\n        width: 50px; }\n\n.hint {\n  color: #808080;\n  font-size: smaller;\n  margin-top: 0.5em; }\n\n#container {\n  position: relative; }\n  #container #canvas1 {\n    position: absolute;\n    top: 0px; }\n  #container #canvas2 {\n    position: absolute;\n    top: 0px; }\n", ""]);
 
 // exports
 
@@ -75377,68 +75377,44 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 
-var sketch = function (p) {
+/* The Model */
+var model = new __WEBPACK_IMPORTED_MODULE_2__MassSpringModel__["a" /* default */](0.1, 1, 10, -0.5, 1, 0);
+/* Time-based variables */
+var dt = 0;
+var previoustime = 0,
+    playtime = 0;
+var graph = [];
+/* Control variables */
+var playing = true;
+/* Define constants */
+const fps = 120; // If it stops working try to lower this
+const mmtopx = 2000; // Approx. 1 m = 2000 px
+const timetopx = 30;
+//const Ntopx = 200;
+const massx = 600,
+      massy = 300,
+      massw = 50,
+      massh = 20;
+const springh = 200,
+      springn = 10,
+      springr = 10,
+      springtop = 20;
+const arroww = 10,
+      arrowh = 3;
+const maxwidth = 10000;
 
-	/* The Model */
-	var model = new __WEBPACK_IMPORTED_MODULE_2__MassSpringModel__["a" /* default */](0.1, 10, 10, -0.5, 1, 0);
-	/* Time-based variables */
-	var dt = 0;
-	var previoustime = 0,
-	    playtime = 0;
-	var graph = [];
-	/* Control variables */
-	var playing = true;
-	/* Define constants */
-	const fps = 60; // If it stops working try to lower this
-	const mmtopx = 2000; // Approx. 1 m = 2000 px
-	const timetopx = 30;
-	//const Ntopx = 200;
-	const massx = 600,
-	      massy = 300,
-	      massw = 50,
-	      massh = 20;
-	const springh = 200,
-	      springn = 10,
-	      springr = 10,
-	      springtop = 20;
-	const arroww = 10,
-	      arrowh = 3;
-
+var sketch1 = function (p) {
 	p.setup = function () {
 		createToolbar();
-		p.createCanvas(p.displayWidth, p.displayHeight);
+		p.createDiv('').id('container').child(p.createCanvas(massx * 1.5, maxwidth).id('canvas1').style('left', massx + 'px'));
 		reset();
 		p.smooth();
-		p.frameRate(fps);
-		//previoustime = now();
+		p.noLoop();
 	};
 
 	p.draw = function () {
-		dt = now() - previoustime || 0.00001; // In case of dt = 0
-		previoustime = now();
-		if (playing) {
-			playtime += dt;
-			p.clear();
-			let y = model.next(dt);
-			//console.log(1000 * y + ' mm');
-			plotGraph();
-			drawSpring(y);
-			p.rect(massx, massy + mmtopx * y, massw, massh);
-			graph.unshift({ 'x': playtime, 'y': y, 'ft': model.getData('ft') });
-		}
+		plotGraph();
 	};
-
-	/** Returns the current UNIX timestamp in seconds */
-	function now() {
-		return Date.now() * 0.001;
-	}
-
-	/** Resets the values to the defaults and restarts the animation */
-	function reset() {
-		model = new __WEBPACK_IMPORTED_MODULE_2__MassSpringModel__["a" /* default */](parseFloat(p.select('#m').value()), parseFloat(p.select('#b').value()), parseFloat(p.select('#k').value()), parseFloat(p.select('#f').value()), Math.pow(10, parseFloat(p.select('#w').value())), parseFloat(p.select('#x0').value()));
-		previoustime = now(), playtime = 0;
-		graph = [];
-	}
 
 	/** Creates settings options in a form of a toolbar */
 	function createToolbar() {
@@ -75461,33 +75437,70 @@ var sketch = function (p) {
 		return labelinput;
 	}
 
-	function drawSpring(y) {
-		p.line(massx, massy - springh + mmtopx / model.getData('k') * model.getData('ft'), massx + massw, massy - springh + mmtopx / model.getData('k') * model.getData('ft'));
-		const diff = 0.5;
-		for (var t = 0; t < 2 * springn * Math.PI; t += diff) {
-			p.line(massx + massw / 2 + springr * Math.sin(t), massy + mmtopx * y - t / (2 * springn * Math.PI) * (springh + mmtopx * y - mmtopx / model.getData('k') * model.getData('ft')), massx + massw / 2 + springr * Math.sin(t + diff), massy + mmtopx * y - (t + diff) / (2 * springn * Math.PI) * (springh + mmtopx * y - mmtopx / model.getData('k') * model.getData('ft')));
-		}
+	/** Resets the values to the defaults and restarts the animation */
+	function reset() {
+		p.clear();
+		model = new __WEBPACK_IMPORTED_MODULE_2__MassSpringModel__["a" /* default */](parseFloat(p.select('#m').value()), parseFloat(p.select('#b').value()), parseFloat(p.select('#k').value()), parseFloat(p.select('#f').value()), Math.pow(10, parseFloat(p.select('#w').value())), parseFloat(p.select('#x0').value()));
+		previoustime = now(), playtime = 0;
+		graph = [{ x: 0, y: 0, ft: 0 }, { x: 0, y: 0, ft: 0 }];
+		p.line(0, massy + massh / 2, maxwidth - arroww, massy + massh / 2);
+		p.triangle(maxwidth, massy + massh / 2, maxwidth - arroww, massy + massh / 2 + arrowh, maxwidth - arroww, massy + massh / 2 - arrowh);
+		p.line(0, arroww, 0, 2 * (massy + massh / 2));
+		p.triangle(0, 0, arrowh, arroww, -arrowh, arroww);
 	}
 
 	function plotGraph() {
-		p.line(0, massy + massh / 2, massx - arroww, massy + massh / 2);
-		p.triangle(massx, massy + massh / 2, massx - arroww, massy + massh / 2 + arrowh, massx - arroww, massy + massh / 2 - arrowh);
-		if (massx - playtime * timetopx > 0) {
-			p.line(massx - playtime * timetopx, arroww, massx - playtime * timetopx, 2 * (massy + massh / 2));
-			p.triangle(massx - playtime * timetopx, 0, massx - playtime * timetopx + arrowh, arroww, massx - playtime * timetopx - arrowh, arroww);
-		}
-		const nth = 1;
-		for (var i = 0; graph[i + nth] && massx - (playtime - graph[i + nth].x) * timetopx > 0; i += nth) {
-			p.stroke(0, 128, 0);
-			p.line(massx - (playtime - graph[i].x) * timetopx, massy + massh / 2 + mmtopx * graph[i].y, massx - (playtime - graph[i + nth].x) * timetopx, massy + massh / 2 + mmtopx * graph[i + nth].y);
-			p.stroke(128, 128, 255);
-			p.line(massx - (playtime - graph[i].x) * timetopx, massy - springh + mmtopx / model.getData('k') * graph[i].ft, massx - (playtime - graph[i + nth].x) * timetopx, massy - springh + mmtopx / model.getData('k') * graph[i + nth].ft);
-		}
+		p.select('#canvas1').style('left', massx - playtime * timetopx + 'px');
+		// const nth = 1;
+		// for (var i = 0; graph[i + nth] && massx - (playtime - graph[i + nth].x) * timetopx > 0; i+=nth) {
+		p.stroke(0, 128, 0);
+		p.line(graph[0].x * timetopx, massy + massh / 2 + mmtopx * graph[0].y, graph[1].x * timetopx, massy + massh / 2 + mmtopx * graph[1].y);
+		p.stroke(128, 128, 255);
+		p.line(graph[0].x * timetopx, massy - springh + mmtopx / model.getData('k') * graph[0].ft, graph[1].x * timetopx, massy - springh + mmtopx / model.getData('k') * graph[1].ft);
+		// }
 		p.stroke(0);
 	}
 };
 
-new __WEBPACK_IMPORTED_MODULE_1_p5___default.a(sketch);
+var p1 = new __WEBPACK_IMPORTED_MODULE_1_p5___default.a(sketch1);
+
+var sketch2 = function (p) {
+
+	p.setup = function () {
+		p.select('#container').child(p.createCanvas(massw + 1, massy * 2).id('canvas2').style('left', massx + 'px'));
+		p.smooth();
+		p.frameRate(fps);
+	};
+
+	p.draw = function () {
+		dt = now() - previoustime || 0.00001; // In case of dt = 0
+		previoustime = now();
+		if (playing) {
+			playtime += dt;
+			p.clear();
+			let y = model.next(dt);
+			drawSpring(y);
+			p1.redraw();
+			p.rect(0, massy + mmtopx * y, massw, massh);
+			graph.unshift({ 'x': playtime, 'y': y, 'ft': model.getData('ft') });
+		}
+	};
+
+	function drawSpring(y) {
+		p.line(0, massy - springh + mmtopx / model.getData('k') * model.getData('ft'), 0 + massw, massy - springh + mmtopx / model.getData('k') * model.getData('ft'));
+		const diff = 0.5;
+		for (var t = 0; t < 2 * springn * Math.PI; t += diff) {
+			p.line(0 + massw / 2 + springr * Math.sin(t), massy + mmtopx * y - t / (2 * springn * Math.PI) * (springh + mmtopx * y - mmtopx / model.getData('k') * model.getData('ft')), 0 + massw / 2 + springr * Math.sin(t + diff), massy + mmtopx * y - (t + diff) / (2 * springn * Math.PI) * (springh + mmtopx * y - mmtopx / model.getData('k') * model.getData('ft')));
+		}
+	}
+};
+
+var p2 = new __WEBPACK_IMPORTED_MODULE_1_p5___default.a(sketch2);
+
+/** Returns the current UNIX timestamp in seconds */
+function now() {
+	return Date.now() * 0.001;
+}
 
 /***/ }),
 
